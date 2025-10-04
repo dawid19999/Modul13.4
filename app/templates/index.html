@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteka 2.0</title>
+</head>
+<body>
+    <h1>📚 Biblioteka 2.0</h1>
+
+    {% if editing_id %}
+        <h2>Edytuj książkę</h2>
+    {% else %}
+        <h2>Dodaj książkę</h2>
+    {% endif %}
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.title.label }} {{ form.title() }}<br>
+        {{ form.authors.label }} {{ form.authors() }}<br>
+        {{ form.year.label }} {{ form.year() }}<br>
+        {{ form.genre.label }} {{ form.genre() }}<br>
+        {{ form.pages.label }} {{ form.pages() }}<br>
+        {{ form.description.label }} {{ form.description() }}<br>
+        {{ form.is_available.label }} {{ form.is_available() }}<br>
+        {{ form.submit() }}
+    </form>
+
+    <h2>Lista książek</h2>
+    <ul>
+        {% for book in books %}
+            <li>
+                <strong>{{ book.title }}</strong> ({{ book.year }})<br>
+                Autorzy: {{ book.authors | map(attribute='name') | join(', ') }}<br>
+                Gatunek: {{ book.genre }} | Stron: {{ book.pages }}<br>
+                {% if not book.is_available %}
+                    <span style="color:red;">❌ Wypożyczona</span>
+                {% else %}
+                    <span style="color:green;">✔️ Dostępna</span>
+                {% endif %}
+                <br>
+                <a href="{{ url_for('index', book_id=book.id) }}">Edytuj</a>
+                <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}" style="display:inline;">
+                    <button type="submit">Usuń</button>
+                </form>
+            </li>
+        {% else %}
+            <li>Brak książek</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
