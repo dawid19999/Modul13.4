@@ -1,51 +1,114 @@
 <!doctype html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <title>Biblioteka 2.0</title>
+    <meta charset="utf-8">
+    <title>Domowa Biblioteka</title>
 </head>
 <body>
-    <h1>📚 Biblioteka 2.0</h1>
+    <h1>Domowa Biblioteka</h1>
 
-    {% if editing_id %}
-        <h2>Edytuj książkę</h2>
-    {% else %}
-        <h2>Dodaj książkę</h2>
-    {% endif %}
+    <h2>{{ 'Edytuj książkę' if editing_id else 'Dodaj nową książkę' }}</h2>
 
     <form method="POST">
         {{ form.hidden_tag() }}
-        {{ form.title.label }} {{ form.title() }}<br>
-        {{ form.authors.label }} {{ form.authors() }}<br>
-        {{ form.year.label }} {{ form.year() }}<br>
-        {{ form.genre.label }} {{ form.genre() }}<br>
-        {{ form.pages.label }} {{ form.pages() }}<br>
-        {{ form.description.label }} {{ form.description() }}<br>
-        {{ form.is_available.label }} {{ form.is_available() }}<br>
-        {{ form.submit() }}
+
+        <p>
+            {{ form.title.label }}<br>
+            {{ form.title(size=50) }}<br>
+            {% for error in form.title.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.authors.label }}<br>
+            {{ form.authors(size=50) }}<br>
+            {% for error in form.authors.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.year.label }}<br>
+            {{ form.year(size=10) }}<br>
+            {% for error in form.year.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.genre.label }}<br>
+            {{ form.genre(size=50) }}<br>
+            {% for error in form.genre.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.pages.label }}<br>
+            {{ form.pages(size=10) }}<br>
+            {% for error in form.pages.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.description.label }}<br>
+            {{ form.description(rows=4, cols=60) }}<br>
+            {% for error in form.description.errors %}
+                <span style="color: red;">{{ error }}</span><br>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.is_available() }}
+            {{ form.is_available.label }}
+        </p>
+
+        <p>
+            {{ form.submit() }}
+            {% if editing_id %}
+                <a href="{{ url_for('index') }}">Anuluj edycję</a>
+            {% endif %}
+        </p>
     </form>
 
+    <hr>
+
     <h2>Lista książek</h2>
-    <ul>
-        {% for book in books %}
-            <li>
-                <strong>{{ book.title }}</strong> ({{ book.year }})<br>
-                Autorzy: {{ book.authors | map(attribute='name') | join(', ') }}<br>
-                Gatunek: {{ book.genre }} | Stron: {{ book.pages }}<br>
-                {% if not book.is_available %}
-                    <span style="color:red;">❌ Wypożyczona</span>
-                {% else %}
-                    <span style="color:green;">✔️ Dostępna</span>
-                {% endif %}
-                <br>
-                <a href="{{ url_for('index', book_id=book.id) }}">Edytuj</a>
-                <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}" style="display:inline;">
-                    <button type="submit">Usuń</button>
-                </form>
-            </li>
-        {% else %}
-            <li>Brak książek</li>
-        {% endfor %}
-    </ul>
+
+    {% if books %}
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr>
+                <th>Tytuł</th>
+                <th>Autorzy</th>
+                <th>Rok</th>
+                <th>Gatunek</th>
+                <th>Liczba stron</th>
+                <th>Opis</th>
+                <th>Dostępna</th>
+                <th>Akcje</th>
+            </tr>
+            {% for book in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.authors | map(attribute='name') | join(', ') }}</td>
+                <td>{{ book.year or '' }}</td>
+                <td>{{ book.genre or '' }}</td>
+                <td>{{ book.pages or '' }}</td>
+                <td>{{ book.description or '' }}</td>
+                <td>{{ 'Tak' if book.is_available else 'Nie' }}</td>
+                <td>
+                    <a href="{{ url_for('index', book_id=book.id) }}">Edytuj</a> |
+                    <form action="{{ url_for('delete_book', book_id=book.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" onclick="return confirm('Na pewno usunąć tę książkę?');">Usuń</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Brak książek w bazie.</p>
+    {% endif %}
 </body>
 </html>
